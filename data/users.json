@@ -1,0 +1,14 @@
+[
+    {
+        "nom": "Diarra",
+        "email": "diarramaimouna327@gmail.com",
+        "password": "$2y$10$Xv\/14pQtFRsMF9pFIpTK4uERw3.InELrfKdl5QmlMUebNhchalIhC",
+        "created_at": "2025-10-06 19:21:46"
+    },
+    {
+        "nom": "Diarra",
+        "email": "maimouna_diarra@reseau.eseo.fr",
+        "password": "$2y$10$7Mcq3vwLAqIe53bF7jHSeOheTp\/ld\/.C2y6pP\/5CEVtXhVJ83zCyy",
+        "created_at": "2025-10-06 19:49:07"
+    }
+]
