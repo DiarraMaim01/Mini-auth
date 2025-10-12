@@ -1,5 +1,7 @@
 <?php
 require_once __DIR__ . '/utils/boot.php';
+require_once __DIR__ . '/utils/db.php';
+
 require_once __DIR__ . '/utils/functions.php';
 
 // Prépareration des variables d'affichage (pour garder l'email tapé en cas d'erreur)
@@ -24,7 +26,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 'nom'   => $user['nom'] ?? ''
             ];
             setFlash("Connexion réussie. Bonjour " . ($user['nom'] ?? '👋') . " !", 'success');
-            redirect('index.php');
+            redirect('dashboard.php');
         } else {
             $errors = "Identifiants invalides.";
         }

@@ -1,5 +1,6 @@
 <?php
 require_once __DIR__ . '/utils/boot.php';
+require_once __DIR__ . '/utils/db.php';
 require_once __DIR__ . '/utils/functions.php';
 
 function wants_json(): bool {

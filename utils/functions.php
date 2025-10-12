@@ -1,87 +1,54 @@
 <?php
 // Fichier utilitaires pour les utilisateurs
+require_once __DIR__ . '/db.php';
 
-// Chemin unique vers le fichier JSON des utilisateurs
-const USERS_FILE = __DIR__ . '/../data/users.json';
-
-/**
- * S'assurer que le dossier/fichier de stockage existe.
- * Crée le dossier data/ et un JSON vide [] si nécessaire.
- */
-function ensureDataStore(): void {
-    $dir = dirname(USERS_FILE);
-    if (!is_dir($dir)) {
-        mkdir($dir, 0777, true);
-    }
-    if (!file_exists(USERS_FILE)) {
-        file_put_contents(USERS_FILE, json_encode([], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE), LOCK_EX);
-    }
-}
-
-// Charger tous les utilisateurs.
- 
-function loadUsers(): array {
-    ensureDataStore();
-    $json = file_get_contents(USERS_FILE);
-    $data = json_decode($json, true);
-    return is_array($data) ? $data : [];
-}
-
-// Sauvegarder tous les utilisateurs.
-
-function saveUsers(array $users): void {
-    ensureDataStore();
-    $json = json_encode($users, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
-    file_put_contents(USERS_FILE, $json, LOCK_EX);
-}
 
 // Trouver un utilisateur par email (insensible à la casse).
 function findUserByEmail(string $email): ?array {
-    $email = strtolower(trim($email));
-    foreach (loadUsers() as $user) {
-        if (strtolower($user['email']) === $email) {
-            return $user;
-        }
-    }
-    return null;
+  $pdo  = get_pdo();
+  $stmt = $pdo->prepare("SELECT * FROM users WHERE email = ?");
+  $stmt->execute([trim($email)]);
+  $row = $stmt->fetch();
+  return $row ?: null;
 }
 
-/**
- * Enregistrer un nouvel utilisateur.
- * Retourne ['ok'=>true] en cas de succès,
- * sinon ['ok'=>false, 'error'=>'message'].
+/*Enregistrer un utilisateur (DB) + validations
+Convention : renvoie ['ok'=>true] ou lève Exception sur erreur
  */
 function registerUser(string $nom, string $email, string $password): array {
-    $nom = trim($nom);
-    $email = strtolower(trim($email));
-    $password = trim($password);
+  $nom      = trim($nom);
+  $email    = trim($email);
+  $password = trim($password);
 
-    // Validations basiques
-    if ($nom === '' || $email === '' || $password === '') {
-        return ['ok' => false, 'error' => 'Tous les champs sont obligatoires.'];
-    }
-    if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-        return ['ok' => false, 'error' => "Adresse email invalide."];
-    }
-    if (strlen($password) < 6) {
-        return ['ok' => false, 'error' => "Le mot de passe doit contenir au moins 6 caractères."];
-    }
-    if (findUserByEmail($email) !== null) {
-        return ['ok' => false, 'error' => "Un utilisateur avec cet email existe déjà."];
-    }
+  // Validations
+  if ($nom === '' || $email === '' || $password === '') {
+    throw new Exception("Tous les champs sont obligatoires.");
+  }
+  if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+    throw new Exception("Email invalide.");
+  }
+  if (strlen($password) < 6) {
+    throw new Exception("Mot de passe trop court (min. 6).");
+  }
 
-    // Hachage du mot de passe
-    $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
+  // Unicité de l'email
+  if (findUserByEmail($email)) {
+    throw new Exception("Un utilisateur avec cet email existe déjà.");
+  }
 
-    // Ajout de l'utilisateur
-    $users = loadUsers();
-    $users[] = [
-        'nom'        => $nom,
-        'email'      => $email,
-        'password'   => $hashedPassword,
-        'created_at' => date('Y-m-d H:i:s'),
-    ];
-    saveUsers($users);
+  // Insertion
+  $hash = password_hash($password, PASSWORD_BCRYPT);
+  $pdo  = get_pdo();
+  $stmt = $pdo->prepare("INSERT INTO users (nom, email, password) VALUES (?, ?, ?)");
+  $stmt->execute([$nom, $email, $hash]);
 
-    return ['ok' => true];
+  return ['ok' => true];
+}
+
+//Lister les utilisateurs 
+
+function listUsers(): array {
+  $pdo  = get_pdo();
+  $stmt = $pdo->query("SELECT id, nom, email, created_at FROM users ORDER BY id DESC");
+  return $stmt->fetchAll();
 }
