@@ -24,7 +24,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 'nom'   => $user['nom'] ?? ''
             ];
             setFlash("Connexion réussie. Bonjour " . ($user['nom'] ?? '👋') . " !", 'success');
-            redirect('dashboard.php');
+            redirect('index.php');
         } else {
             $errors = "Identifiants invalides.";
         }
@@ -72,25 +72,12 @@ $flashError   = getFlash('error');
   <form method="POST" action="">
     <div>
       <label for="email">Email</label>
-      <input
-        type="email"
-        id="email"
-        name="email"
-        required
-        value="<?= htmlspecialchars($email) ?>"
-        autocomplete="email"
-      >
+      <input type="email" id="email" name="email" required value="<?= htmlspecialchars($email) ?>" autocomplete="email">
     </div>
 
     <div>
       <label for="password">Mot de passe</label>
-      <input
-        type="password"
-        id="password"
-        name="password"
-        required
-        autocomplete="current-password"
-      >
+      <input type="password" id="password" name="password" required autocomplete="current-password">
     </div>
 
     <button type="submit">Se connecter</button>
