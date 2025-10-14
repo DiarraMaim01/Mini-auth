@@ -1,6 +1,6 @@
 # 🧩 Mini Auth (PHP + MySQL + PDO)
 
-**Projet de la semaine 2–3 du parcours Full-Stack PHP/JS**
+**Projet de la semaine 2 du parcours Full-Stack PHP/JS**
 Mini application d’authentification sécurisée avec gestion de session, hash de mot de passe et base de données MySQL.
 
 ---
